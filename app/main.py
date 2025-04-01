@@ -8,7 +8,7 @@ app = FastAPI()
 
 # -------------------- Cargar y Preparar el Dataset --------------------
 # Carga el dataset completo
-movies_df = pd.read_csv(r"C:\Users\Usuario\Desktop\Henry- DS\LABS\PI -MLOPS\MLOPS\app\movies_final.csv")
+movies_df = pd.read_csv("app/movies_final.csv")
 
 # Para pruebas, creamos un subconjunto de 500 registros
 movies_sample = movies_df.sample(n=500, random_state=42)
