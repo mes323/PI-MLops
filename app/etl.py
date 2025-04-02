@@ -106,3 +106,8 @@ movies_sample = movies_df.merge(credits_df, on="id", how="left")
 
 # Verificar resultados
 movies_sample.head()
+
+# Para poder trabajar con un Dataset mas corto extraemos una muestra de manera aleatoria.
+#movies_final = movies_df.sample(n=4000, random_state=42)
+# Usamos una muestra del 10% para poder correr el modelo en Render.
+#movies_final.to_csv("movies_final.csv")

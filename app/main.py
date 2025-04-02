@@ -7,11 +7,9 @@ import uvicorn
 app = FastAPI()
 
 # -------------------- Cargar y Preparar el Dataset --------------------
-# Carga el dataset completo
-movies_df = pd.read_csv("app/movies_final.csv")
+# Carga el dataset completo (la muestra extraida en ETL)
+movies_sample = pd.read_csv("app/movies_final.csv")
 
-# Para pruebas, creamos un subconjunto de 500 registros
-movies_sample = movies_df.sample(n=500, random_state=42)
 
 # Convertir la columna release_date a datetime y extraer año y mes
 movies_sample["release_date"] = pd.to_datetime(movies_sample["release_date"], errors="coerce")
@@ -113,3 +111,4 @@ def recomendacion(titulo: str):
 # -------------------- Ejecutar la API --------------------
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
