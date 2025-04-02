@@ -8,7 +8,7 @@ app = FastAPI()
 
 # -------------------- Cargar y Preparar el Dataset --------------------
 # Carga el dataset completo (la muestra extraida en ETL)
-movies_sample = pd.read_csv("app/movies_final.csv")
+movies_sample = pd.read_csv("movies_final.csv")
 
 
 # Convertir la columna release_date a datetime y extraer año y mes
