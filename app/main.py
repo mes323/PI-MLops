@@ -116,8 +116,10 @@ def recomendacion(titulo: str):
         recommendations = movies_sample["title"].iloc[movie_indices].tolist()
         return {"recommended_movies": recommendations}
     
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
-        print("Error en /recomendacion:", e)
+        logging.error(f"Error interno en /recomendacion: {e}")
         raise HTTPException(status_code=500, detail=f"Error interno: {e}")
 
 # -------------------- Ejecutar la API --------------------
