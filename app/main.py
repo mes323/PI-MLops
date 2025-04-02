@@ -85,28 +85,40 @@ def votos_titulo(titulo: str):
 
 @app.get("/recomendacion/{titulo}")
 def recomendacion(titulo: str):
-    # Para recomendaciones, combinamos algunas características. Asegúrate que existan las columnas 'genres', 'actors' y 'director'
-    # Si estas columnas no están presentes en tu dataset, deberás integrarlas en tu ETL.
-    movies_sample["features"] = (
-        movies_sample["genres"].fillna('') + " " +
-        movies_sample["actors"].fillna('') + " " +
-        movies_sample["director"].fillna('')
-    )
-    # Crear la matriz TF-IDF y la similitud de coseno
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(movies_sample["features"])
-    cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+    try:
+        # Normaliza el título recibido (elimina comillas y espacios, y lo convierte a minúsculas)
+        titulo = titulo.strip("'\" ").lower()
+        
+        # Crear o actualizar la columna 'features' combinando 'genres', 'actors' y 'director'
+        movies_sample["features"] = (
+            movies_sample["genres"].fillna('') + " " +
+            movies_sample["actors"].fillna('') + " " +
+            movies_sample["director"].fillna('')
+        )
+        
+        # Genera la matriz TF-IDF a partir de la columna 'features'
+        tfidf = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf.fit_transform(movies_sample["features"])
+        cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
+        
+        # Crea una Serie con los títulos en minúsculas y sus índices
+        indices = pd.Series(movies_sample.index, index=movies_sample['title'].str.lower())
+        
+        # Verifica si el título existe en la Serie
+        if titulo not in indices:
+            raise HTTPException(status_code=404, detail="Película no encontrada para recomendaciones")
+        
+        idx = indices[titulo]
+        sim_scores = list(enumerate(cosine_sim[idx]))
+        # Ordena y excluye la propia película
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]
+        movie_indices = [i[0] for i in sim_scores]
+        recommendations = movies_sample["title"].iloc[movie_indices].tolist()
+        return {"recommended_movies": recommendations}
     
-    indices = pd.Series(movies_sample.index, index=movies_sample['title'].str.lower())
-    title_lower = titulo.lower()
-    if title_lower not in indices:
-        raise HTTPException(status_code=404, detail="Película no encontrada para recomendaciones")
-    idx = indices[title_lower]
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:6]  # Excluye la misma película
-    movie_indices = [i[0] for i in sim_scores]
-    recommendations = movies_sample["title"].iloc[movie_indices].tolist()
-    return {"recommended_movies": recommendations}
+    except Exception as e:
+        print("Error en /recomendacion:", e)
+        raise HTTPException(status_code=500, detail=f"Error interno: {e}")
 
 # -------------------- Ejecutar la API --------------------
 if __name__ == "__main__":
